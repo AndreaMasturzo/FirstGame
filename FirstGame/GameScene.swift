@@ -19,6 +19,9 @@ enum PhysicsCategory: UInt32 {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    var backgrounds: [Background] = []
+    let hud = HUD()
+    var coinsCollected = 0 
     let powerUpStar = Star()
     var nextEncounterSpawnPosition = CGFloat(150)
     let encounterManager = EncounterManager()
@@ -100,6 +103,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Setting the GameScene physicsWorld property to the GameScene instance
         self.physicsWorld.contactDelegate = self
+        
+        // Add the camera itself to the scene's node tree
+        self.addChild(self.camera!)
+        // Position the camera node above the game elements
+        self.camera!.zPosition = 50
+        // Create teh HUD's child nodes
+        hud.createHudNodes(screenSize: self.size)
+        // Add the HUD camera to the node tree
+        self.camera!.addChild(hud)
+        
+        // Instantiate three Backgrounds to the backgrounds array:
+                       for _ in 0..<3 {
+                           backgrounds.append(Background())
+                       }
+                       // Spawn the new backgrounds:
+                       backgrounds[0].spawn(parentNode: self,
+                           imageName: "background-front", zPosition: -5,
+                           movementMultiplier: 0.75)
+                       backgrounds[1].spawn(parentNode: self,
+                           imageName: "background-middle", zPosition: -10,
+                           movementMultiplier: 0.5)
+                       backgrounds[2].spawn(parentNode: self,
+                           imageName: "background-back", zPosition: -15,
+                           movementMultiplier: 0.2)
+
     }
     override func touchesBegan(_ touches: Set<UITouch>,
                                with event: UIEvent?) {
@@ -164,6 +192,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
         }
+        // Position the backgrounds:
+                       for background in self.backgrounds {
+                           background.updatePosition(playerProgress:
+                               playerProgress)
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -195,12 +228,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         // Find the type of contact
         switch otherBody.categoryBitMask {
-        case PhysicsCategory.ground.rawValue: print("Hit the ground")
+        case PhysicsCategory.ground.rawValue:
             player.takeDamage()
-        case PhysicsCategory.enemy.rawValue: print("Take damage")
+            hud.setHealthDisplay(newHealth: player.health)
+        case PhysicsCategory.enemy.rawValue:
             player.takeDamage()
-        case PhysicsCategory.coin.rawValue: print("Collect a coin")
-        case PhysicsCategory.powerup.rawValue: print("Start the powerup")
+            hud.setHealthDisplay(newHealth: player.health)
+        case PhysicsCategory.coin.rawValue:
+            // Try to cast otherBody's node as a Coin
+            if let coin = otherBody.node as? Coin {
+                // Invoke the collect animation
+                coin.collect()
+                // Add the value of the coin to our counter
+                self.coinsCollected += coin.value
+                hud.setCoinCountDisplay(newCoinCount: self.coinsCollected)
+            }
+        case PhysicsCategory.powerup.rawValue:
+            player.starPower()
         default: print("Contact with no game logic")
         }
     }

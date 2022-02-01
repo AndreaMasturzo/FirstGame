@@ -28,6 +28,8 @@
 		43FC06C127A8497600E4B943 /* EncounterA.sks in Resources */ = {isa = PBXBuildFile; fileRef = 43FC06BE27A8497600E4B943 /* EncounterA.sks */; };
 		43FC06C227A8497600E4B943 /* EncounterC.sks in Resources */ = {isa = PBXBuildFile; fileRef = 43FC06BF27A8497600E4B943 /* EncounterC.sks */; };
 		43FC06C327A8497600E4B943 /* EncounterB.sks in Resources */ = {isa = PBXBuildFile; fileRef = 43FC06C027A8497600E4B943 /* EncounterB.sks */; };
+		43FEF00E27A97A1900250FB4 /* HUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FEF00D27A97A1900250FB4 /* HUD.swift */; };
+		43FEF01027A993B000250FB4 /* Background.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FEF00F27A993B000250FB4 /* Background.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +55,8 @@
 		43FC06BE27A8497600E4B943 /* EncounterA.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EncounterA.sks; sourceTree = "<group>"; };
 		43FC06BF27A8497600E4B943 /* EncounterC.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EncounterC.sks; sourceTree = "<group>"; };
 		43FC06C027A8497600E4B943 /* EncounterB.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EncounterB.sks; sourceTree = "<group>"; };
+		43FEF00D27A97A1900250FB4 /* HUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUD.swift; sourceTree = "<group>"; };
+		43FEF00F27A993B000250FB4 /* Background.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Background.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +100,8 @@
 				43FC06B527A8480100E4B943 /* MadFly.swift */,
 				43FC06B727A8481D00E4B943 /* Player.swift */,
 				43FC06B927A8482D00E4B943 /* Star.swift */,
+				43FEF00D27A97A1900250FB4 /* HUD.swift */,
+				43FEF00F27A993B000250FB4 /* Background.swift */,
 				43FC069227A8468800E4B943 /* GameScene.sks */,
 				43FC069427A8468800E4B943 /* Actions.sks */,
 				43FC069627A8468800E4B943 /* GameScene.swift */,
@@ -205,8 +211,10 @@
 				43FC069927A8468800E4B943 /* GameViewController.swift in Sources */,
 				43FC069127A8468800E4B943 /* AppDelegate.swift in Sources */,
 				43FC06AC27A8478500E4B943 /* Bee.swift in Sources */,
+				43FEF00E27A97A1900250FB4 /* HUD.swift in Sources */,
 				43FC06B027A847AB00E4B943 /* Coin.swift in Sources */,
 				43FC06A827A8474900E4B943 /* EncounterManager.swift in Sources */,
+				43FEF01027A993B000250FB4 /* Background.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

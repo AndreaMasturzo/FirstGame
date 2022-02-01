@@ -13,7 +13,7 @@ class Player : SKSpriteNode, GameSprite {
     var damaged = false
     var damageAnimation = SKAction()
     var dieAnimation = SKAction()
-    var forewardVelocity: CGFloat = 200
+    var forwardVelocity: CGFloat = 200
     var initialSize = CGSize(width: 64, height: 64)
     var textureAtlas: SKTextureAtlas =
     SKTextureAtlas(named: "Pierre")
@@ -120,6 +120,31 @@ class Player : SKSpriteNode, GameSprite {
         fadeOutAndIn,
         damageEnd
         ])
+        
+        /* --- Create the death animation --- */
+        let stardDie = SKAction.run {
+            // Switch to the death texture with X eyes
+            self.texture = self.textureAtlas.textureNamed("pierre-dead")
+            // Suspend the penguin in space
+            self.physicsBody?.affectedByGravity = false
+            // Stop any movement
+            self.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+        }
+        let endDie = SKAction.run {
+            // Turn gravity back on
+            self.physicsBody?.affectedByGravity = true
+        }
+        self.dieAnimation = SKAction.sequence([
+        stardDie,
+        // Scale the penguin bigger
+        SKAction.scale(to: 1.3, duration: 0.5),
+        // Use the WaitForDuration action to provide a shorto pause
+        SKAction.wait(forDuration: 0.5),
+        // Rotate the penguin on its back
+        SKAction.rotate(toAngle: 3, duration: 1.5),
+        SKAction.wait(forDuration: 0.5),
+        endDie
+        ])
     }
     // Implement onTap to conform to the GameSprite protocol
     func onTap() {}
@@ -151,7 +176,7 @@ class Player : SKSpriteNode, GameSprite {
             self.physicsBody!.velocity.dy = 300
         }
         // Set a constant velocity to the right:
-        self.physicsBody?.velocity.dx = self.forewardVelocity
+        self.physicsBody?.velocity.dx = self.forwardVelocity
     }
     // Begin the flap animation, set flapping to true:
     func startFlapping() {
@@ -173,7 +198,7 @@ class Player : SKSpriteNode, GameSprite {
         self.removeAllActions()
         self.run(self.dieAnimation)
         self.flapping = false
-        self.forewardVelocity = 0
+        self.forwardVelocity = 0
     }
     
     func takeDamage() {
@@ -185,5 +210,25 @@ class Player : SKSpriteNode, GameSprite {
         } else {
             self.run(self.damageAnimation)
         }
+    }
+    func starPower() {
+        // Remove any existing star power-up animation, if the player is already under the power of a star
+        self.removeAction(forKey: "starPower")
+        // Grant great forward speed
+        self.forwardVelocity = 400
+        // Make the player invulnerable
+        self.invulnerable = true
+        // Create a sequence to scale the player larger, wait 8 seconds, then scale it back down and turn off invulnerability
+        let starSequence = SKAction.sequence([
+            SKAction.scale(to: 1.5, duration: 0.3),
+            SKAction.wait(forDuration: 8),
+            SKAction.scale(to: 1, duration: 1),
+            SKAction.run {
+                self.forwardVelocity = 200
+                self.invulnerable = false
+            }
+        ])
+        // Execute the sequence
+        self.run(starSequence, withKey: "starPower")
     }
 }
