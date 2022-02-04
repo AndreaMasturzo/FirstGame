@@ -9,6 +9,7 @@ import Foundation
 import SpriteKit
 
 class Coin: SKSpriteNode, GameSprite {
+    let coinSound = SKAction.playSoundFileNamed("Sound/Coin.aif", waitForCompletion: false)
     var initialSize = CGSize(width: 26, height: 26)
     var textureAtlas: SKTextureAtlas =
     SKTextureAtlas(named: "Environment")
@@ -48,10 +49,14 @@ class Coin: SKSpriteNode, GameSprite {
         }
         // Combine the actions into a sequence
         let collectSequence = SKAction.sequence([
-        collectAnimation,
-        resetAfterCollected
+            collectAnimation,
+            resetAfterCollected
         ])
         self.run(collectSequence)
+        
+        // Play the coin sound:
+        self.run(coinSound)
+        
     }
     func onTap() {}
     required init?(coder aDecoder: NSCoder) {

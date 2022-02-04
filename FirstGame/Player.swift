@@ -8,6 +8,8 @@
 import Foundation
 import SpriteKit
 class Player : SKSpriteNode, GameSprite {
+    let powerupSound = SKAction.playSoundFileNamed("Sound/Powerup.aif", waitForCompletion: false)
+    let hurtSound = SKAction.playSoundFileNamed("Sound/Hurt.aif", waitForCompletion: false)
     var health = 3
     var invulnerable = false
     var damaged = false
@@ -53,6 +55,18 @@ class Player : SKSpriteNode, GameSprite {
         self.physicsBody?.categoryBitMask = PhysicsCategory.penguin.rawValue
         self.physicsBody?.contactTestBitMask = PhysicsCategory.enemy.rawValue | PhysicsCategory.ground.rawValue | PhysicsCategory.powerup.rawValue | PhysicsCategory.coin.rawValue
         self.physicsBody?.collisionBitMask = PhysicsCategory.ground.rawValue
+        
+        // Grant a momentary reprieve from gravity
+        self.physicsBody?.affectedByGravity = false
+        // Add some slight upward velocity
+        self.physicsBody?.velocity.dy = 80
+        // Create a SKAction to start gravity after a small delay
+        let startGravitySequence = SKAction.sequence([
+            SKAction.wait(forDuration: 0.6),
+            SKAction.run {
+                self.physicsBody?.affectedByGravity = true
+            }
+        ])
         
     }
     func createAnimations() {
@@ -103,7 +117,7 @@ class Player : SKSpriteNode, GameSprite {
         let fastFade = SKAction.sequence([
             SKAction.fadeAlpha(to: 0.3, duration: 0.2),
             SKAction.fadeAlpha(to: 0.7, duration: 0.2)
-            ])
+        ])
         let fadeOutAndIn = SKAction.sequence([
             SKAction.repeat(slowFade, count: 2),
             SKAction.repeat(fastFade, count: 5),
@@ -116,9 +130,9 @@ class Player : SKSpriteNode, GameSprite {
         }
         // Store the all sequence in a damageAnimatio property
         self.damageAnimation = SKAction.sequence([
-        damageStart,
-        fadeOutAndIn,
-        damageEnd
+            damageStart,
+            fadeOutAndIn,
+            damageEnd
         ])
         
         /* --- Create the death animation --- */
@@ -135,15 +149,15 @@ class Player : SKSpriteNode, GameSprite {
             self.physicsBody?.affectedByGravity = true
         }
         self.dieAnimation = SKAction.sequence([
-        stardDie,
-        // Scale the penguin bigger
-        SKAction.scale(to: 1.3, duration: 0.5),
-        // Use the WaitForDuration action to provide a shorto pause
-        SKAction.wait(forDuration: 0.5),
-        // Rotate the penguin on its back
-        SKAction.rotate(toAngle: 3, duration: 1.5),
-        SKAction.wait(forDuration: 0.5),
-        endDie
+            stardDie,
+            // Scale the penguin bigger
+            SKAction.scale(to: 1.3, duration: 0.5),
+            // Use the WaitForDuration action to provide a shorto pause
+            SKAction.wait(forDuration: 0.5),
+            // Rotate the penguin on its back
+            SKAction.rotate(toAngle: 3, duration: 1.5),
+            SKAction.wait(forDuration: 0.5),
+            endDie
         ])
     }
     // Implement onTap to conform to the GameSprite protocol
@@ -199,6 +213,10 @@ class Player : SKSpriteNode, GameSprite {
         self.run(self.dieAnimation)
         self.flapping = false
         self.forwardVelocity = 0
+        // Alert the GameScene:
+        if let gameScene = self.parent as? GameScene {
+            gameScene.gameOver()
+        }
     }
     
     func takeDamage() {
@@ -210,6 +228,8 @@ class Player : SKSpriteNode, GameSprite {
         } else {
             self.run(self.damageAnimation)
         }
+        // Play the hurt sound:
+        self.run(hurtSound)
     }
     func starPower() {
         // Remove any existing star power-up animation, if the player is already under the power of a star
@@ -230,5 +250,8 @@ class Player : SKSpriteNode, GameSprite {
         ])
         // Execute the sequence
         self.run(starSequence, withKey: "starPower")
+        
+        // Play the powerup sound:
+        self.run(powerupSound)
     }
 }

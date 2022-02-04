@@ -7,6 +7,7 @@
 
 import SpriteKit
 import CoreMotion
+import AVFoundation
 
 
 enum PhysicsCategory: UInt32 {
@@ -21,7 +22,7 @@ enum PhysicsCategory: UInt32 {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var backgrounds: [Background] = []
     let hud = HUD()
-    var coinsCollected = 0 
+    var coinsCollected = 0
     let powerUpStar = Star()
     var nextEncounterSpawnPosition = CGFloat(150)
     let encounterManager = EncounterManager()
@@ -114,20 +115,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.camera!.addChild(hud)
         
         // Instantiate three Backgrounds to the backgrounds array:
-                       for _ in 0..<3 {
-                           backgrounds.append(Background())
-                       }
-                       // Spawn the new backgrounds:
-                       backgrounds[0].spawn(parentNode: self,
-                           imageName: "background-front", zPosition: -5,
-                           movementMultiplier: 0.75)
-                       backgrounds[1].spawn(parentNode: self,
-                           imageName: "background-middle", zPosition: -10,
-                           movementMultiplier: 0.5)
-                       backgrounds[2].spawn(parentNode: self,
-                           imageName: "background-back", zPosition: -15,
-                           movementMultiplier: 0.2)
-
+        for _ in 0..<3 {
+            backgrounds.append(Background())
+        }
+        // Spawn the new backgrounds:
+        backgrounds[0].spawn(parentNode: self,
+                             imageName: "background-front", zPosition: -5,
+                             movementMultiplier: 0.75)
+        backgrounds[1].spawn(parentNode: self,
+                             imageName: "background-middle", zPosition: -10,
+                             movementMultiplier: 0.5)
+        backgrounds[2].spawn(parentNode: self,
+                             imageName: "background-back", zPosition: -15,
+                             movementMultiplier: 0.2)
+        
+        // Instantiate a SKEmitterNode with the PierrePath design
+        if let dotEmitter = SKEmitterNode(fileNamed: "PierrePath") {
+            // Position the penguin in front of the other game objects
+            player.zPosition = 10
+            // Plase the particle zPosition behind the penguin
+            dotEmitter.particleZPosition = -1
+            // By adding the emitter node to the player, the emitter moves with the penguin and emits new dots wherever the palyer is
+            player.addChild(dotEmitter)
+            // However, the particles themselves should target the scene, so they trail behind as the player moves forward
+            dotEmitter.targetNode = self
+        }
+        // Play the start sound:
+        self.run(SKAction.playSoundFileNamed("Sound/StartGame.aif", waitForCompletion: false))
+        
+        // Play start sound
+        self.run(SKAction.playSoundFileNamed("Sound/StartGame.aif", waitForCompletion: false))
+        
     }
     override func touchesBegan(_ touches: Set<UITouch>,
                                with event: UIEvent?) {
@@ -193,9 +211,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         // Position the backgrounds:
-                       for background in self.backgrounds {
-                           background.updatePosition(playerProgress:
-                               playerProgress)
+        for background in self.backgrounds {
+            background.updatePosition(playerProgress:
+                                        playerProgress)
         }
     }
     
@@ -221,7 +239,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // This returns a positive number if body A's category is the same as penguin or damagedPenguin
         if (contact.bodyA.categoryBitMask & penguinMask) > 0 {
             // bodyA is the penguin, we will test bodyB's type
-        otherBody = contact.bodyB
+            otherBody = contact.bodyB
         } else {
             // bodyB is the penguin, we will test bodyA's type
             otherBody = contact.bodyA
@@ -248,4 +266,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         default: print("Contact with no game logic")
         }
     }
+    func gameOver() {
+        // Show the restart and main menu buttons:
+        hud.showButtons()
+    }
 }
+
+class BackgroundMusic: NSObject {
+    // Create the class as a singleton
+    static let instance = BackgroundMusic()
+    var musicPlayer = AVAudioPlayer()
+    
+    func playBackgroundMusic() {
+        // Start the background music
+        if let musicPath = Bundle.main.path(forResource: "Sound/BackgroundMusic.m4a", ofType: nil) {
+            let url = URL(fileURLWithPath: musicPath)
+            do {
+                musicPlayer = try AVAudioPlayer(contentsOf: url)
+                musicPlayer.numberOfLoops = -1
+                musicPlayer.prepareToPlay()
+                musicPlayer.play()
+            }
+            catch {
+                /* Couldn't load music file */
+            }
+            if isMuted() {
+                pauseMusic()
+            }
+        }
+    }
+    func pauseMusic() {
+        UserDefaults.standard.set(true, forKey: "BackgroundMusicMuteState")
+        musicPlayer.pause()
+    }
+    func playMusic() {
+        UserDefaults.standard.set(false, forKey: "BackgroundMusicMuteState")
+        musicPlayer.play()
+    }
+    // Check mute state
+    func isMuted() -> Bool {
+        if UserDefaults.standard.bool(forKey: "BackgroundMusicMuteState") {
+            return true } else {
+                return false
+            }
+    }
+    func setVolume(volume: Float) {
+        musicPlayer.volume = volume
+    }
+}
+
